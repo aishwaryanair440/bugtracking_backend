@@ -1,15 +1,22 @@
 // src/routes/studentRoutes.js
-// Student routes — CRUD will be implemented in a later phase.
+// Routes for /api/students
 
 const express = require("express");
 const router = express.Router();
 
-// GET /api/students  (placeholder)
-router.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Students route is ready",
-  });
-});
+const studentController = require("../controllers/studentController");
+const { protect, requireRole } = require("../middleware/authMiddleware");
+const { validateIdParam, validateStudent } = require("../middleware/validateMiddleware");
+
+router
+  .route("/")
+  .get(protect, studentController.getStudents)
+  .post(protect, requireRole("faculty"), validateStudent(false), studentController.createStudent);
+
+router
+  .route("/:id")
+  .get(protect, validateIdParam, studentController.getStudentById)
+  .put(protect, validateIdParam, validateStudent(true), studentController.updateStudent)
+  .delete(protect, requireRole("faculty"), validateIdParam, studentController.deleteStudent);
 
 module.exports = router;

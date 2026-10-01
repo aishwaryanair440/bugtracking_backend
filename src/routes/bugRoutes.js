@@ -1,15 +1,22 @@
 // src/routes/bugRoutes.js
-// Bug report routes — CRUD will be implemented in a later phase.
+// Routes for /api/bugs
 
 const express = require("express");
 const router = express.Router();
 
-// GET /api/bugs  (placeholder)
-router.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Bugs route is ready",
-  });
-});
+const bugController = require("../controllers/bugController");
+const { protect } = require("../middleware/authMiddleware");
+const { validateIdParam, validateBug } = require("../middleware/validateMiddleware");
+
+router
+  .route("/")
+  .get(protect, bugController.getBugs)
+  .post(protect, validateBug(false), bugController.createBug);
+
+router
+  .route("/:id")
+  .get(protect, validateIdParam, bugController.getBugById)
+  .put(protect, validateIdParam, validateBug(true), bugController.updateBug)
+  .delete(protect, validateIdParam, bugController.deleteBug);
 
 module.exports = router;

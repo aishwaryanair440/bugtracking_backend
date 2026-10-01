@@ -1,15 +1,22 @@
 // src/routes/taskRoutes.js
-// Task routes — CRUD will be implemented in a later phase.
+// Routes for /api/tasks
 
 const express = require("express");
 const router = express.Router();
 
-// GET /api/tasks  (placeholder)
-router.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Tasks route is ready",
-  });
-});
+const taskController = require("../controllers/taskController");
+const { protect } = require("../middleware/authMiddleware");
+const { validateIdParam, validateTask } = require("../middleware/validateMiddleware");
+
+router
+  .route("/")
+  .get(protect, taskController.getTasks)
+  .post(protect, validateTask(false), taskController.createTask);
+
+router
+  .route("/:id")
+  .get(protect, validateIdParam, taskController.getTaskById)
+  .put(protect, validateIdParam, validateTask(true), taskController.updateTask)
+  .delete(protect, validateIdParam, taskController.deleteTask);
 
 module.exports = router;

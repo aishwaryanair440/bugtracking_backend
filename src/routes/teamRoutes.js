@@ -1,15 +1,22 @@
 // src/routes/teamRoutes.js
-// Team routes — CRUD will be implemented in a later phase.
+// Routes for /api/teams
 
 const express = require("express");
 const router = express.Router();
 
-// GET /api/teams  (placeholder)
-router.get("/", (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Teams route is ready",
-  });
-});
+const teamController = require("../controllers/teamController");
+const { protect, requireRole } = require("../middleware/authMiddleware");
+const { validateIdParam, validateTeam } = require("../middleware/validateMiddleware");
+
+router
+  .route("/")
+  .get(protect, teamController.getTeams)
+  .post(protect, requireRole("faculty"), validateTeam(false), teamController.createTeam);
+
+router
+  .route("/:id")
+  .get(protect, validateIdParam, teamController.getTeamById)
+  .put(protect, requireRole("faculty"), validateIdParam, validateTeam(true), teamController.updateTeam)
+  .delete(protect, requireRole("faculty"), validateIdParam, teamController.deleteTeam);
 
 module.exports = router;
